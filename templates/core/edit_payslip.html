@@ -1,0 +1,15 @@
+{% extends 'core/base.html' %}
+{% block page_title %}Edit Payslip{% endblock %}
+{% block content %}
+<div class="card mt-4">
+  <div class="card-body">
+    <h4 class="card-title">Edit Payslip</h4>
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit" class="btn btn-primary">Save Changes</button>
+      <a href="{% url 'admin_payslips' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %} 

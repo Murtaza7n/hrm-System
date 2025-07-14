@@ -1,0 +1,14 @@
+{% extends 'core/base.html' %}
+{% block page_title %}My Department{% endblock %}
+{% block content %}
+<div class="card mt-4">
+  <div class="card-body">
+    <h4 class="card-title">My Department</h4>
+    {% if department %}
+      <p><strong>Name:</strong> {{ department.name }}</p>
+    {% else %}
+      <p class="text-muted">No department assigned.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %} 

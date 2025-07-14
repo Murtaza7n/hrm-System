@@ -1,0 +1,14 @@
+{% extends 'core/base.html' %}
+{% block page_title %}Employee Created{% endblock %}
+{% block content %}
+<div class="card mt-4">
+  <div class="card-body">
+    <h4 class="card-title">Employee Created Successfully!</h4>
+    <p class="card-text">The new employee account has been created.</p>
+    <p><strong>Username:</strong> {{ username }}</p>
+    <p><strong>Password:</strong> {{ password }}</p>
+    <a href="{% url 'add_employee' %}" class="btn btn-success">Add Another Employee</a>
+    <a href="{% url 'employee_list' %}" class="btn btn-secondary">Back to Employee List</a>
+  </div>
+</div>
+{% endblock %} 

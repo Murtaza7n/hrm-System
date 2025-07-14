@@ -1,0 +1,47 @@
+{% extends 'core/base.html' %}
+{% block page_title %}Manage Leave Requests{% endblock %}
+{% block content %}
+<div class="card mt-4">
+  <div class="card-body">
+    <h4 class="card-title">All Leave Requests</h4>
+    <table class="table table-bordered">
+      <thead><tr><th>Employee</th><th>Type</th><th>From</th><th>To</th><th>Status</th><th>Reason</th><th>Comments</th><th>Actions</th></tr></thead>
+      <tbody>
+        {% for leave in leaves %}
+        <tr>
+          <td>{{ leave.employee.user.get_full_name|default:leave.employee.user.username }}</td>
+          <td>{{ leave.get_leave_type_display }}</td>
+          <td>{{ leave.start_date }}</td>
+          <td>{{ leave.end_date }}</td>
+          <td>{{ leave.get_status_display }}</td>
+          <td>{{ leave.reason }}</td>
+          <td>{{ leave.comments }}</td>
+          <td>
+            {% if leave.status == 'pending' %}
+            <form method="post" style="display:inline;">
+              {% csrf_token %}
+              <input type="hidden" name="leave_id" value="{{ leave.id }}">
+              <input type="hidden" name="action" value="approved">
+              <input type="text" name="comments" placeholder="Comments" class="form-control mb-1">
+              <button type="submit" class="btn btn-success btn-sm mb-1">Approve</button>
+            </form>
+            <form method="post" style="display:inline;">
+              {% csrf_token %}
+              <input type="hidden" name="leave_id" value="{{ leave.id }}">
+              <input type="hidden" name="action" value="rejected">
+              <input type="text" name="comments" placeholder="Comments" class="form-control mb-1">
+              <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+            </form>
+            {% else %}
+              <span class="text-muted">No actions</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="8">No leave requests found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %} 

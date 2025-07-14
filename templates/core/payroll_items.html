@@ -1,0 +1,36 @@
+{% extends 'core/base.html' %}
+{% block page_title %}Payroll Items{% endblock %}
+{% block content %}
+<div class="card mt-4">
+  <div class="card-body">
+    <h4 class="card-title">Payroll Items (Admin)</h4>
+    <form method="post" class="mb-4">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit" class="btn btn-primary">Add Payroll Item</button>
+    </form>
+    <table class="table table-bordered">
+      <thead><tr><th>Name</th><th>Type</th><th>Amount</th><th>Description</th><th>Actions</th></tr></thead>
+      <tbody>
+        {% for item in items %}
+        <tr>
+          <td>{{ item.name }}</td>
+          <td>{{ item.get_item_type_display }}</td>
+          <td>{{ item.amount }}</td>
+          <td>{{ item.description }}</td>
+          <td>
+            <a href="{% url 'edit_payroll_item' item.id %}" class="btn btn-sm btn-warning">Edit</a>
+            <form action="{% url 'delete_payroll_item' item.id %}" method="post" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this item?');">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4">No payroll items found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %} 

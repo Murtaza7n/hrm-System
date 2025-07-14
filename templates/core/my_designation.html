@@ -1,0 +1,15 @@
+{% extends 'core/base.html' %}
+{% block page_title %}My Designation{% endblock %}
+{% block content %}
+<div class="card mt-4">
+  <div class="card-body">
+    <h4 class="card-title">My Designation</h4>
+    {% if designation %}
+      <p><strong>Name:</strong> {{ designation.name }}</p>
+      <p><strong>Description:</strong> {{ designation.description }}</p>
+    {% else %}
+      <p class="text-muted">No designation assigned.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,74 @@
+{% extends 'core/base.html' %}
+{% block page_title %}Holidays{% endblock %}
+{% block content %}
+<div class="card mt-4">
+  <div class="card-body">
+    <h4 class="card-title">Upcoming Holidays</h4>
+    <p class="text-muted">Loaded {{ holidays|length }} holidays.</p>
+    <table class="table table-bordered">
+      <thead><tr><th>Name</th><th>Date</th><th>Description</th></tr></thead>
+      <tbody>
+        {% for holiday in holidays %}
+        <tr>
+          <td>{{ holiday.name }}</td>
+          <td>{{ holiday.date }}</td>
+          <td>{{ holiday.description }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="3">No holidays found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div class="mt-4">
+      <h5>Holiday Calendar</h5>
+      <div id="holiday-calendar"></div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('holiday-calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+          initialView: 'dayGridMonth',
+          height: 500,
+          events: [
+            {% for holiday in holidays %}
+              {
+                title: '{{ holiday.name|escapejs }}',
+                start: '{{ holiday.date }}',
+                description: '{{ holiday.description|escapejs }}',
+                allDay: true
+              },
+            {% endfor %}
+          ],
+          eventDidMount: function(info) {
+            if (info.event.extendedProps.description) {
+              var tooltip = document.createElement('div');
+              tooltip.innerHTML = info.event.extendedProps.description;
+              tooltip.style.position = 'absolute';
+              tooltip.style.background = '#fff';
+              tooltip.style.border = '1px solid #ccc';
+              tooltip.style.padding = '5px';
+              tooltip.style.display = 'none';
+              tooltip.style.zIndex = 10000;
+              document.body.appendChild(tooltip);
+              info.el.addEventListener('mouseenter', function(e) {
+                tooltip.style.display = 'block';
+                tooltip.style.left = e.pageX + 10 + 'px';
+                tooltip.style.top = e.pageY + 10 + 'px';
+              });
+              info.el.addEventListener('mousemove', function(e) {
+                tooltip.style.left = e.pageX + 10 + 'px';
+                tooltip.style.top = e.pageY + 10 + 'px';
+              });
+              info.el.addEventListener('mouseleave', function() {
+                tooltip.style.display = 'none';
+              });
+            }
+          }
+        });
+        calendar.render();
+      });
+    </script>
+  </div>
+</div>
+{% endblock %} 

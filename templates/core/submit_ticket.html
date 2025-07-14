@@ -1,0 +1,21 @@
+{% extends 'core/base.html' %}
+{% block page_title %}Submit Ticket{% endblock %}
+{% block content %}
+<div class="card mt-4">
+  <div class="card-body">
+    <h4 class="card-title">Submit New Ticket</h4>
+    <form method="post">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label for="title" class="form-label">Title</label>
+        <input type="text" class="form-control" id="title" name="title" required>
+      </div>
+      <div class="mb-3">
+        <label for="description" class="form-label">Description</label>
+        <textarea class="form-control" id="description" name="description" rows="4" required></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary">Submit Ticket</button>
+    </form>
+  </div>
+</div>
+{% endblock %} 

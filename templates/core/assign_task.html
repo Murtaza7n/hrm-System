@@ -1,0 +1,15 @@
+{% extends 'core/base.html' %}
+{% block page_title %}Assign Task{% endblock %}
+{% block content %}
+<div class="card mt-4">
+  <div class="card-body">
+    <h4 class="card-title">Assign Task for Project: {{ project.name }}</h4>
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit" class="btn btn-primary">Assign Task</button>
+      <a href="{% url 'project_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %} 

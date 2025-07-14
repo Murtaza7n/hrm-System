@@ -1,0 +1,23 @@
+{% extends 'core/base.html' %}
+{% block page_title %}Apply for Leave{% endblock %}
+{% block content %}
+<div class="card mt-4">
+  <div class="card-body">
+    <h4 class="card-title">Apply for Leave</h4>
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p|safe }}
+      <script>
+        // Enhance the start and end date inputs with a calendar picker
+        document.addEventListener('DOMContentLoaded', function() {
+          var dateInputs = document.querySelectorAll('input[name$="date"]');
+          dateInputs.forEach(function(input) {
+            input.type = 'date';
+          });
+        });
+      </script>
+      <button type="submit" class="btn btn-primary">Apply</button>
+    </form>
+  </div>
+</div>
+{% endblock %} 

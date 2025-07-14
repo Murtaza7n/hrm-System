@@ -1,0 +1,23 @@
+{% extends 'core/base.html' %}
+{% block page_title %}Select Project to View Tasks{% endblock %}
+{% block content %}
+<div class="card mt-4">
+  <div class="card-body">
+    <h4 class="card-title">Select a Project to View Tasks</h4>
+    <form method="post">
+      {% csrf_token %}
+      <div class="mb-3">
+        {% for project in projects %}
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="project_id" id="project{{ project.id }}" value="{{ project.id }}">
+            <label class="form-check-label" for="project{{ project.id }}">
+              {{ project.name }} ({{ project.client.name }})
+            </label>
+          </div>
+        {% endfor %}
+      </div>
+      <button type="submit" class="btn btn-primary">Continue</button>
+    </form>
+  </div>
+</div>
+{% endblock %} 

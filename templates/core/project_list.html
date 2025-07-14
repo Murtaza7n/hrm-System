@@ -1,0 +1,37 @@
+{% extends 'core/base.html' %}
+{% block page_title %}Projects{% endblock %}
+{% block content %}
+<div class="card mt-4">
+  <div class="card-body">
+    <h4 class="card-title">Projects</h4>
+    <a href="{% url 'add_project' %}" class="btn btn-primary mb-3">Add Project</a>
+    <table class="table table-bordered">
+      <thead><tr><th>Name</th><th>Client</th><th>Project Manager</th><th>Actions</th></tr></thead>
+      <tbody>
+        {% for project in projects %}
+        <tr>
+          <td><a href="{% url 'project_detail' project.id %}">{{ project.name }}</a></td>
+          <td>{{ project.client.name }}</td>
+          <td>
+            {% if project.manager %}
+              {{ project.manager.user.get_full_name|default:project.manager.user.username }} ({{ project.manager.department.name }}, {{ project.manager.designation.name }})
+            {% else %}
+              <span class="text-muted">No manager assigned</span>
+            {% endif %}
+          </td>
+          <td>
+            <a href="{% url 'edit_project' project.id %}" class="btn btn-sm btn-outline-primary">Edit</a>
+            <form action="{% url 'delete_project' project.id %}" method="post" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this project?');">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4">No projects found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %} 

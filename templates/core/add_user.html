@@ -1,0 +1,15 @@
+{% extends 'core/base.html' %}
+{% block page_title %}Add User{% endblock %}
+{% block content %}
+<div class="card mt-4">
+  <div class="card-body">
+    <h4 class="card-title">Add User</h4>
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit" class="btn btn-success">Add User</button>
+      <a href="{% url 'admin_user_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %} 

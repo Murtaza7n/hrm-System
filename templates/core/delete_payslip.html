@@ -1,0 +1,15 @@
+{% extends 'core/base.html' %}
+{% block page_title %}Delete Payslip{% endblock %}
+{% block content %}
+<div class="card mt-4">
+  <div class="card-body">
+    <h4 class="card-title">Delete Payslip</h4>
+    <p>Are you sure you want to delete payslip for <strong>{{ payslip.employee }}</strong> dated <strong>{{ payslip.date }}</strong>?</p>
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger">Delete</button>
+      <a href="{% url 'admin_payslips' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,37 @@
+{% extends 'core/base.html' %}
+{% block page_title %}My Attendance{% endblock %}
+{% block content %}
+  <div class="card mt-4">
+    <div class="card-body">
+      <h4 class="card-title">My Attendance</h4>
+      {% if not today_record %}
+        <form method="post">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-success mb-3">Mark Attendance (Check In)</button>
+        </form>
+      {% elif today_record and not today_record.check_out %}
+        <form method="post">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-warning mb-3">Check Out</button>
+        </form>
+      {% else %}
+        <div class="alert alert-info mb-3">Attendance marked for today. (Checked in and out)</div>
+      {% endif %}
+      <table class="table table-bordered">
+        <thead><tr><th>Date</th><th>Status</th><th>Check In</th><th>Check Out</th></tr></thead>
+        <tbody>
+          {% for record in records %}
+          <tr>
+            <td>{{ record.date }}</td>
+            <td>{{ record.get_status_display }}</td>
+            <td>{{ record.check_in|default:'-' }}</td>
+            <td>{{ record.check_out|default:'-' }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4">No attendance records found.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %} 

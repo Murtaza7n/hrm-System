@@ -1,0 +1,26 @@
+{% extends 'core/base.html' %}
+{% block page_title %}My Tasks{% endblock %}
+{% block content %}
+<div class="card mt-4">
+  <div class="card-body">
+    <h4 class="card-title">My Assigned Tasks</h4>
+    <a href="{% url 'dashboard' %}" class="btn btn-secondary mb-3">Back to Dashboard</a>
+    <table class="table table-bordered">
+      <thead><tr><th>Project</th><th>Assigned By</th><th>Title</th><th>Status</th><th>Description</th></tr></thead>
+      <tbody>
+        {% for task in tasks %}
+        <tr>
+          <td>{{ task.project.name }}</td>
+          <td>{{ task.assigned_by.user.get_full_name|default:task.assigned_by.user.username }}</td>
+          <td>{{ task.title }}</td>
+          <td>{{ task.get_status_display }}</td>
+          <td>{{ task.description }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5">No tasks assigned to you.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %} 
