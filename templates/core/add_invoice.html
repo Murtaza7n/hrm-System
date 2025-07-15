@@ -1,0 +1,158 @@
+{% extends 'core/base.html' %}
+{% load crispy_forms_tags %}
+{% block page_title %}Add Invoice{% endblock %}
+{% block content %}
+<div class="card mt-4">
+  <div class="card-body">
+    <h4 class="card-title mb-4">Add Invoice</h4>
+    <form method="post">
+      {% csrf_token %}
+      <div class="row">
+        <div class="col-md-3 mb-3">
+          {{ form.client|as_crispy_field }}
+        </div>
+        <div class="col-md-3 mb-3">
+          {{ form.project|as_crispy_field }}
+        </div>
+        <div class="col-md-3 mb-3">
+          {{ form.tax|as_crispy_field }}
+        </div>
+        <div class="col-md-3 mb-3">
+          {{ form.status|as_crispy_field }}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          {{ form.client_address|as_crispy_field }}
+        </div>
+        <div class="col-md-6 mb-3">
+          {{ form.billing_address|as_crispy_field }}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-3 mb-3">
+          {{ form.invoice_date|as_crispy_field }}
+        </div>
+        <div class="col-md-3 mb-3">
+          {{ form.due_date|as_crispy_field }}
+        </div>
+      </div>
+      <hr/>
+      <h5>Items</h5>
+      <div id="invoice-items">
+        {{ formset.management_form }}
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Description</th>
+              <th>Unit Cost</th>
+              <th>Qty</th>
+              <th>Amount</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for form in formset %}
+            <tr>
+              <td>{{ form.item }}</td>
+              <td>{{ form.description }}</td>
+              <td>{{ form.unit_cost }}</td>
+              <td>{{ form.quantity }}</td>
+              <td>{{ form.amount }}</td>
+              <td>{% if forloop.first %}<button type="button" class="btn btn-success add-row">+</button>{% else %}<button type="button" class="btn btn-danger remove-row">-</button>{% endif %}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="row">
+        <div class="col-md-4 offset-md-8">
+          <table class="table">
+            <tr><th>Sub Total</th><td id="subtotal">0</td></tr>
+            <tr><th>Tax</th><td id="tax">0</td></tr>
+            <tr><th>Discount %</th><td>{{ form.discount }}</td></tr>
+            <tr><th>Grand Total</th><td id="grandtotal">0</td></tr>
+          </table>
+        </div>
+      </div>
+      <div class="mb-3">
+        {{ form.other_info|as_crispy_field }}
+      </div>
+      <div class="text-center">
+        <button type="submit" class="btn btn-warning">Save & Send</button>
+        <button type="submit" class="btn btn-warning">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    // Add new item row
+    $(document).on('click', '.add-row', function() {
+        var $lastRow = $('#invoice-items tbody tr:last');
+        var $newRow = $lastRow.clone();
+        $newRow.find('input').val('');
+        $newRow.find('.add-row').removeClass('add-row btn-success').addClass('remove-row btn-danger').text('-');
+        $('#invoice-items tbody').append($newRow);
+        updateFormsetIndexes();
+    });
+
+    // Remove item row
+    $(document).on('click', '.remove-row', function() {
+        if ($('#invoice-items tbody tr').length > 1) {
+            $(this).closest('tr').remove();
+            updateFormsetIndexes();
+            calculateTotals();
+        }
+    });
+
+    // Recalculate totals on input change
+    $(document).on('input', 'input[name$="unit_cost"], input[name$="quantity"], input[name$="discount"]', function() {
+        calculateTotals();
+    });
+
+    // Calculate totals on page load
+    calculateTotals();
+
+    function updateFormsetIndexes() {
+        var forms = $('#invoice-items tbody tr');
+        $('#id_form-TOTAL_FORMS').val(forms.length);
+        forms.each(function(i, row) {
+            $(row).find('input, select, textarea').each(function() {
+                var name = $(this).attr('name');
+                if (name) {
+                    var newName = name.replace(/form-(\d+)-/, 'form-' + i + '-');
+                    $(this).attr('name', newName);
+                    $(this).attr('id', 'id_' + newName);
+                }
+            });
+        });
+    }
+
+    function calculateTotals() {
+        var subtotal = 0;
+        $('#invoice-items tbody tr').each(function() {
+            var unitCost = parseFloat($(this).find('input[name$="unit_cost"]').val()) || 0;
+            var qty = parseInt($(this).find('input[name$="quantity"]').val()) || 0;
+            var amount = unitCost * qty;
+            $(this).find('input[name$="amount"]').val(amount.toFixed(2));
+            subtotal += amount;
+        });
+        $('#subtotal').text(subtotal.toFixed(2));
+        var taxPercent = parseFloat($('#id_tax option:selected').text().match(/\d+/)) || 0;
+        var tax = subtotal * taxPercent / 100;
+        $('#tax').text(tax.toFixed(2));
+        var discount = parseFloat($('#id_discount').val()) || 0;
+        var grandTotal = subtotal + tax - (subtotal * discount / 100);
+        $('#grandtotal').text(grandTotal.toFixed(2));
+    }
+
+    // Recalculate totals when tax or discount changes
+    $('#id_tax, #id_discount').on('change input', function() {
+        calculateTotals();
+    });
+});
+</script>
+{% endblock %} 

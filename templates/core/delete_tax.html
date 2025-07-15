@@ -1,0 +1,15 @@
+{% extends 'core/base.html' %}
+{% block page_title %}Delete Tax{% endblock %}
+{% block content %}
+<div class="card mt-4">
+  <div class="card-body text-center">
+    <h4 class="card-title mb-4">Delete Tax</h4>
+    <p>Are you sure you want to delete the tax <strong>{{ tax.name }}</strong>?</p>
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger">Yes, Delete</button>
+      <a href="{% url 'taxes' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %} 

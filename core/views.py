@@ -32,6 +32,25 @@ from .forms import BudgetRevenueForm
 from .models import BudgetRevenue
 from .forms import AssetForm
 from .models import Asset
+from .forms import CompanySettingsForm
+from .models import CompanySettings
+from .forms import LocalizationSettingsForm
+from .models import LocalizationSettings
+from .forms import InvoiceSettingsForm
+from .models import InvoiceSettings
+from .forms import SalarySettingsForm
+from .models import SalarySettings
+from .forms import ThemeSettingsForm
+from .models import ThemeSettings
+from .forms import TaxForm
+from .models import Tax
+from .forms import ExpenseForm
+from .models import Expense
+from django.forms import inlineformset_factory
+from .models import Estimate, EstimateItem
+from .forms import EstimateForm, EstimateItemForm
+from .forms import InvoiceForm, InvoiceItemForm
+from .models import Invoice, InvoiceItem
 
 def login_view(request):
     if request.method == 'POST':
@@ -906,3 +925,297 @@ def asset_delete(request, pk):
         asset.delete()
         return redirect('asset_list')
     return render(request, 'core/asset_confirm_delete.html', {'asset': asset})
+
+@user_passes_test(is_admin)
+def admin_user_list(request):
+    users = User.objects.all()
+    return render(request, 'core/admin_user_list.html', {'users': users})
+
+@user_passes_test(is_admin)
+def add_user(request):
+    if request.method == 'POST':
+        form = UserAdminForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            password = form.cleaned_data.get('password')
+            if password:
+                user.set_password(password)
+            user.save()
+            messages.success(request, 'User added successfully!')
+            return redirect('admin_user_list')
+    else:
+        form = UserAdminForm()
+    return render(request, 'core/add_user.html', {'form': form})
+
+@user_passes_test(is_admin)
+def edit_user(request, user_id):
+    user = get_object_or_404(User, pk=user_id)
+    if request.method == 'POST':
+        form = UserAdminForm(request.POST, instance=user)
+        if form.is_valid():
+            user = form.save(commit=False)
+            password = form.cleaned_data.get('password')
+            if password:
+                user.set_password(password)
+            user.save()
+            messages.success(request, 'User updated successfully!')
+            return redirect('admin_user_list')
+    else:
+        form = UserAdminForm(instance=user)
+    return render(request, 'core/add_user.html', {'form': form, 'edit_mode': True, 'user_obj': user})
+
+@user_passes_test(is_admin)
+def activate_user(request, user_id):
+    user = get_object_or_404(User, pk=user_id)
+    user.is_active = True
+    user.save()
+    messages.success(request, 'User activated successfully!')
+    return redirect('admin_user_list')
+
+@user_passes_test(is_admin)
+def deactivate_user(request, user_id):
+    user = get_object_or_404(User, pk=user_id)
+    user.is_active = False
+    user.save()
+    messages.success(request, 'User deactivated successfully!')
+    return redirect('admin_user_list')
+
+@user_passes_test(is_admin)
+def delete_user(request, user_id):
+    user = get_object_or_404(User, pk=user_id)
+    if request.method == 'POST':
+        user.delete()
+        messages.success(request, 'User deleted successfully!')
+        return redirect('admin_user_list')
+    return render(request, 'core/confirm_delete_user.html', {'user_obj': user})
+
+@user_passes_test(is_admin)
+def settings_main(request):
+    settings_obj, _ = CompanySettings.objects.get_or_create(pk=1)
+    if request.method == 'POST':
+        form = CompanySettingsForm(request.POST, instance=settings_obj)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Company settings updated!')
+            return redirect('settings_main')
+    else:
+        form = CompanySettingsForm(instance=settings_obj)
+    return render(request, 'core/settings_main.html', {'form': form, 'active_section': 'company'})
+
+@user_passes_test(is_admin)
+def settings_localization(request):
+    settings_obj, _ = LocalizationSettings.objects.get_or_create(pk=1)
+    if request.method == 'POST':
+        form = LocalizationSettingsForm(request.POST, instance=settings_obj)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Localization settings updated!')
+            return redirect('settings_localization')
+    else:
+        form = LocalizationSettingsForm(instance=settings_obj)
+    return render(request, 'core/settings_localization.html', {'form': form, 'active_section': 'localization'})
+
+@user_passes_test(is_admin)
+def settings_invoice(request):
+    settings_obj, _ = InvoiceSettings.objects.get_or_create(pk=1)
+    if request.method == 'POST':
+        form = InvoiceSettingsForm(request.POST, request.FILES, instance=settings_obj)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Invoice settings updated!')
+            return redirect('settings_invoice')
+    else:
+        form = InvoiceSettingsForm(instance=settings_obj)
+    return render(request, 'core/settings_invoice.html', {'form': form, 'active_section': 'invoice', 'settings_obj': settings_obj})
+
+@user_passes_test(is_admin)
+def settings_salary(request):
+    settings_obj, _ = SalarySettings.objects.get_or_create(pk=1)
+    if request.method == 'POST':
+        form = SalarySettingsForm(request.POST, instance=settings_obj)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Salary settings updated!')
+            return redirect('settings_salary')
+    else:
+        form = SalarySettingsForm(instance=settings_obj)
+    return render(request, 'core/settings_salary.html', {'form': form, 'active_section': 'salary'})
+
+@user_passes_test(is_admin)
+def settings_theme(request):
+    settings_obj, _ = ThemeSettings.objects.get_or_create(pk=1)
+    if request.method == 'POST':
+        form = ThemeSettingsForm(request.POST, request.FILES, instance=settings_obj)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Theme settings updated!')
+            return redirect('settings_theme')
+    else:
+        form = ThemeSettingsForm(instance=settings_obj)
+    return render(request, 'core/settings_theme.html', {'form': form, 'active_section': 'theme', 'settings_obj': settings_obj})
+
+def theme_settings_context(request):
+    from .models import ThemeSettings
+    try:
+        settings_obj = ThemeSettings.objects.first()
+    except Exception:
+        settings_obj = None
+    return {'theme_settings': settings_obj}
+
+@user_passes_test(is_admin)
+def taxes(request):
+    taxes = Tax.objects.all()
+    form = TaxForm(request.POST or None)
+    if request.method == 'POST':
+        if form.is_valid():
+            form.save()
+            return redirect('taxes')
+    return render(request, 'core/taxes.html', {'taxes': taxes, 'form': form})
+
+@user_passes_test(is_admin)
+def expenses(request):
+    expenses = Expense.objects.all()
+    form = ExpenseForm(request.POST or None)
+    if request.method == 'POST':
+        if form.is_valid():
+            form.save()
+            return redirect('expenses')
+    return render(request, 'core/expenses.html', {'expenses': expenses, 'form': form})
+
+@user_passes_test(is_admin)
+def estimates(request):
+    estimates = Estimate.objects.all().prefetch_related('items', 'client', 'project')
+    for estimate in estimates:
+        estimate.total_amount = sum(item.amount for item in estimate.items.all())
+    return render(request, 'core/estimates.html', {'estimates': estimates})
+
+@user_passes_test(is_admin)
+def invoices(request):
+    return render(request, 'core/invoices.html')
+
+@user_passes_test(is_admin)
+def invoice_list(request):
+    invoices = Invoice.objects.all().select_related('client', 'project', 'tax')
+    for invoice in invoices:
+        invoice.total_amount = sum(item.amount for item in invoice.items.all())
+    return render(request, 'core/invoices.html', {'invoices': invoices})
+
+@user_passes_test(is_admin)
+def add_invoice(request):
+    InvoiceItemFormSet = inlineformset_factory(Invoice, InvoiceItem, form=InvoiceItemForm, extra=1, can_delete=True)
+    if request.method == 'POST':
+        form = InvoiceForm(request.POST)
+        formset = InvoiceItemFormSet(request.POST)
+        if form.is_valid() and formset.is_valid():
+            invoice = form.save()
+            items = formset.save(commit=False)
+            for item in items:
+                item.invoice = invoice
+                item.amount = item.unit_cost * item.quantity
+                item.save()
+            formset.save_m2m()
+            return redirect('invoices')
+    else:
+        form = InvoiceForm()
+        formset = InvoiceItemFormSet()
+    return render(request, 'core/add_invoice.html', {'form': form, 'formset': formset})
+
+@user_passes_test(is_admin)
+def add_estimate(request):
+    EstimateItemFormSet = inlineformset_factory(Estimate, EstimateItem, form=EstimateItemForm, extra=1, can_delete=True)
+    if request.method == 'POST':
+        form = EstimateForm(request.POST)
+        formset = EstimateItemFormSet(request.POST)
+        if form.is_valid() and formset.is_valid():
+            estimate = form.save()
+            items = formset.save(commit=False)
+            for item in items:
+                item.estimate = estimate
+                item.amount = item.unit_cost * item.quantity
+                item.save()
+            formset.save_m2m()
+            return redirect('estimates')
+    else:
+        form = EstimateForm()
+        formset = EstimateItemFormSet()
+    return render(request, 'core/add_estimate.html', {'form': form, 'formset': formset})
+
+def edit_tax(request, tax_id):
+    tax = get_object_or_404(Tax, id=tax_id)
+    if request.method == 'POST':
+        form = TaxForm(request.POST, instance=tax)
+        if form.is_valid():
+            form.save()
+            return redirect('taxes')
+    else:
+        form = TaxForm(instance=tax)
+    return render(request, 'core/edit_tax.html', {'form': form, 'tax': tax})
+
+def delete_tax(request, tax_id):
+    tax = get_object_or_404(Tax, id=tax_id)
+    if request.method == 'POST':
+        tax.delete()
+        return redirect('taxes')
+    return render(request, 'core/delete_tax.html', {'tax': tax})
+
+def edit_expense(request, expense_id):
+    expense = get_object_or_404(Expense, id=expense_id)
+    if request.method == 'POST':
+        form = ExpenseForm(request.POST, instance=expense)
+        if form.is_valid():
+            form.save()
+            return redirect('expenses')
+    else:
+        form = ExpenseForm(instance=expense)
+    return render(request, 'core/edit_expense.html', {'form': form, 'expense': expense})
+
+def delete_expense(request, expense_id):
+    expense = get_object_or_404(Expense, id=expense_id)
+    if request.method == 'POST':
+        expense.delete()
+        return redirect('expenses')
+    return render(request, 'core/delete_expense.html', {'expense': expense})
+
+def edit_estimate(request, estimate_id):
+    estimate = get_object_or_404(Estimate, id=estimate_id)
+    EstimateItemFormSet = inlineformset_factory(Estimate, EstimateItem, form=EstimateItemForm, extra=0, can_delete=True)
+    if request.method == 'POST':
+        form = EstimateForm(request.POST, instance=estimate)
+        formset = EstimateItemFormSet(request.POST, instance=estimate)
+        if form.is_valid() and formset.is_valid():
+            form.save()
+            formset.save()
+            return redirect('estimates')
+    else:
+        form = EstimateForm(instance=estimate)
+        formset = EstimateItemFormSet(instance=estimate)
+    return render(request, 'core/edit_estimate.html', {'form': form, 'formset': formset, 'estimate': estimate})
+
+def delete_estimate(request, estimate_id):
+    estimate = get_object_or_404(Estimate, id=estimate_id)
+    if request.method == 'POST':
+        estimate.delete()
+        return redirect('estimates')
+    return render(request, 'core/delete_estimate.html', {'estimate': estimate})
+
+def edit_invoice(request, invoice_id):
+    invoice = get_object_or_404(Invoice, id=invoice_id)
+    InvoiceItemFormSet = inlineformset_factory(Invoice, InvoiceItem, form=InvoiceItemForm, extra=0, can_delete=True)
+    if request.method == 'POST':
+        form = InvoiceForm(request.POST, instance=invoice)
+        formset = InvoiceItemFormSet(request.POST, instance=invoice)
+        if form.is_valid() and formset.is_valid():
+            form.save()
+            formset.save()
+            return redirect('invoices')
+    else:
+        form = InvoiceForm(instance=invoice)
+        formset = InvoiceItemFormSet(instance=invoice)
+    return render(request, 'core/edit_invoice.html', {'form': form, 'formset': formset, 'invoice': invoice})
+
+def delete_invoice(request, invoice_id):
+    invoice = get_object_or_404(Invoice, id=invoice_id)
+    if request.method == 'POST':
+        invoice.delete()
+        return redirect('invoices')
+    return render(request, 'core/delete_invoice.html', {'invoice': invoice})

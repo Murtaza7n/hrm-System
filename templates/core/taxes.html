@@ -1,0 +1,73 @@
+{% extends 'core/base.html' %}
+{% load crispy_forms_tags %}
+{% block page_title %}Taxes{% endblock %}
+{% block content %}
+<div class="card mt-4">
+  <div class="card-body">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h4 class="card-title mb-0">Taxes</h4>
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTaxModal">Add Tax</button>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Tax Name</th>
+            <th>Percentage</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for tax in taxes %}
+          <tr>
+            <td>{{ tax.name }}</td>
+            <td>{{ tax.percentage }}%</td>
+            <td>{{ tax.active|yesno:'Active,Inactive' }}</td>
+            <td>
+              <a href="{% url 'edit_tax' tax.id %}" class="btn btn-sm btn-outline-primary">Edit</a>
+              <a href="{% url 'delete_tax' tax.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="3">No taxes found.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<!-- Add Tax Modal -->
+<div class="modal fade" id="addTaxModal" tabindex="-1" aria-labelledby="addTaxModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addTaxModalLabel">Add Tax</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form method="post">
+        {% csrf_token %}
+        <div class="modal-body">
+          {% if form.errors %}
+            <div class="alert alert-danger">{{ form.errors }}</div>
+          {% endif %}
+          <div class="mb-3">
+            {{ form.name.label_tag }}
+            {{ form.name }}
+          </div>
+          <div class="mb-3">
+            {{ form.percentage.label_tag }}
+            {{ form.percentage }}
+          </div>
+          <div class="mb-3 form-check">
+            {{ form.active }} {{ form.active.label_tag }}
+          </div>
+        </div>
+        <div class="modal-footer d-flex justify-content-center">
+          <button type="submit" class="btn" style="background:#ffa64d;color:#fff;font-weight:bold;font-size:18px;border-radius:30px;padding:8px 40px;">Submit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %} 

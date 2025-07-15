@@ -1,4 +1,4 @@
-from .models import Department, Employee, Designation, Holiday, Leave, BudgetCategory, Budget, BudgetExpense, BudgetRevenue, Asset
+from .models import Department, Employee, Designation, Holiday, Leave, BudgetCategory, Budget, BudgetExpense, BudgetRevenue, Asset, CompanySettings, LocalizationSettings, InvoiceSettings, SalarySettings, ThemeSettings, Tax, Expense, Estimate, EstimateItem, Invoice, InvoiceItem
 from django.contrib import admin
 
 # Register your models here.
@@ -15,3 +15,14 @@ admin.site.register(Budget)
 admin.site.register(BudgetExpense)
 admin.site.register(BudgetRevenue)
 admin.site.register(Asset)
+admin.site.register(CompanySettings)
+admin.site.register(LocalizationSettings)
+admin.site.register(InvoiceSettings)
+admin.site.register(SalarySettings)
+admin.site.register(ThemeSettings)
+admin.site.register(Tax)
+admin.site.register(Expense)
+admin.site.register(Estimate)
+admin.site.register(EstimateItem)
+admin.site.register(Invoice)
+admin.site.register(InvoiceItem)

@@ -36,6 +36,10 @@
               {% else %}
               <a href="{% url 'activate_user' user.id %}" class="btn btn-sm btn-outline-success">Activate</a>
               {% endif %}
+              <form action="{% url 'delete_user' user.id %}" method="post" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this user?');">Delete</button>
+              </form>
             </td>
           </tr>
           {% endfor %}

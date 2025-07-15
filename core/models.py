@@ -286,3 +286,219 @@ class Asset(models.Model):
 
     def __str__(self):
         return f"{self.asset_name} ({self.asset_id})"
+
+class CompanySettings(models.Model):
+    company_name = models.CharField(max_length=255)
+    contact_person = models.CharField(max_length=255, blank=True)
+    address = models.TextField(blank=True)
+    country = models.CharField(max_length=100, blank=True)
+    city = models.CharField(max_length=100, blank=True)
+    state_province = models.CharField(max_length=100, blank=True)
+    postal_code = models.CharField(max_length=20, blank=True)
+    email = models.EmailField(blank=True)
+    phone_number = models.CharField(max_length=30, blank=True)
+    mobile_number = models.CharField(max_length=30, blank=True)
+    fax = models.CharField(max_length=30, blank=True)
+    website_url = models.CharField(max_length=255, blank=True)
+
+    def __str__(self):
+        return self.company_name or 'Company Settings'
+
+class LocalizationSettings(models.Model):
+    LANGUAGE_CHOICES = [
+        ('en', 'English'),
+        ('ur', 'Urdu'),
+        ('ar', 'Arabic'),
+        # Add more as needed
+    ]
+    TIMEZONE_CHOICES = [
+        ('Asia/Karachi', 'Asia/Karachi'),
+        ('Asia/Dubai', 'Asia/Dubai'),
+        ('UTC', 'UTC'),
+        # Add more as needed
+    ]
+    default_language = models.CharField(max_length=10, choices=LANGUAGE_CHOICES, default='en')
+    timezone = models.CharField(max_length=50, choices=TIMEZONE_CHOICES, default='Asia/Karachi')
+    date_format = models.CharField(max_length=20, default='%Y-%m-%d')
+    time_format = models.CharField(max_length=20, default='%H:%M')
+    currency = models.CharField(max_length=10, default='PKR')
+    currency_symbol = models.CharField(max_length=5, default='₨')
+    thousand_separator = models.CharField(max_length=2, default=',')
+    decimal_separator = models.CharField(max_length=2, default='.')
+
+    def __str__(self):
+        return f"Localization ({self.default_language}, {self.timezone})"
+
+class InvoiceSettings(models.Model):
+    prefix = models.CharField(max_length=20, default='INV-')
+    logo = models.ImageField(upload_to='invoice_logos/', blank=True, null=True)
+
+    def __str__(self):
+        return f"Invoice Settings ({self.prefix})"
+
+class SalarySettings(models.Model):
+    # DA and HRA
+    da_enabled = models.BooleanField(default=False)
+    da_percent = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    hra_enabled = models.BooleanField(default=False)
+    hra_percent = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    # Provident Fund
+    pf_enabled = models.BooleanField(default=False)
+    pf_employee_share = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    pf_org_share = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    # ESI
+    esi_enabled = models.BooleanField(default=False)
+    esi_employee_share = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    esi_org_share = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    # Gratuity
+    gratuity_enabled = models.BooleanField(default=False)
+    gratuity_employee_share = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    gratuity_org_share = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+
+    def __str__(self):
+        return "Salary Settings"
+
+class ThemeSettings(models.Model):
+    LAYOUT_CHOICES = [
+        ('vertical', 'Vertical'),
+        ('horizontal', 'Horizontal'),
+    ]
+    LAYOUT_WIDTH_CHOICES = [
+        ('fluid', 'Fluid'),
+        ('boxed', 'Boxed'),
+    ]
+    COLOR_SCHEME_CHOICES = [
+        ('light', 'Light'),
+        ('dark', 'Dark'),
+        ('orange', 'Orange'),
+        ('blue', 'Blue'),
+        ('maroon', 'Maroon'),
+        ('purple', 'Purple'),
+    ]
+    LAYOUT_POSITION_CHOICES = [
+        ('scrollable', 'Scrollable'),
+        ('fixed', 'Fixed'),
+    ]
+    TOPBAR_COLOR_CHOICES = [
+        ('light', 'Light'),
+        ('dark', 'Dark'),
+    ]
+    SIDEBAR_SIZE_CHOICES = [
+        ('default', 'Default'),
+        ('small', 'Small'),
+        ('large', 'Large'),
+    ]
+    SIDEBAR_VIEW_CHOICES = [
+        ('default', 'Default'),
+        ('compact', 'Compact'),
+    ]
+    SIDEBAR_COLOR_CHOICES = [
+        ('light', 'Light'),
+        ('dark', 'Dark'),
+    ]
+    app_name = models.CharField(max_length=100, default='SBS HRM')
+    logo_light = models.ImageField(upload_to='theme_logos/', blank=True, null=True)
+    logo_dark = models.ImageField(upload_to='theme_logos/', blank=True, null=True)
+    favicon = models.ImageField(upload_to='theme_favicons/', blank=True, null=True)
+    layout = models.CharField(max_length=20, choices=LAYOUT_CHOICES, default='vertical')
+    layout_width = models.CharField(max_length=20, choices=LAYOUT_WIDTH_CHOICES, default='fluid')
+    color_scheme = models.CharField(max_length=20, choices=COLOR_SCHEME_CHOICES, default='light')
+    layout_position = models.CharField(max_length=20, choices=LAYOUT_POSITION_CHOICES, default='scrollable')
+    topbar_color = models.CharField(max_length=20, choices=TOPBAR_COLOR_CHOICES, default='light')
+    sidebar_size = models.CharField(max_length=20, choices=SIDEBAR_SIZE_CHOICES, default='default')
+    sidebar_view = models.CharField(max_length=20, choices=SIDEBAR_VIEW_CHOICES, default='default')
+    sidebar_color = models.CharField(max_length=20, choices=SIDEBAR_COLOR_CHOICES, default='dark')
+
+    def __str__(self):
+        return f"Theme Settings ({self.app_name})"
+
+class Tax(models.Model):
+    name = models.CharField(max_length=100)
+    percentage = models.DecimalField(max_digits=5, decimal_places=2)
+    active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.percentage}%)"
+
+class Expense(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    ]
+    item_name = models.CharField(max_length=200)
+    purchased_from = models.CharField(max_length=200)
+    purchased_date = models.DateField()
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    paid_by = models.CharField(max_length=100)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+
+    def __str__(self):
+        return f"{self.item_name} - {self.amount}";
+
+class Estimate(models.Model):
+    STATUS_CHOICES = [
+        ('draft', 'Draft'),
+        ('sent', 'Sent'),
+        ('accepted', 'Accepted'),
+        ('rejected', 'Rejected'),
+    ]
+    client = models.ForeignKey('Client', on_delete=models.CASCADE)
+    project = models.ForeignKey('Project', on_delete=models.SET_NULL, null=True, blank=True)
+    tax = models.ForeignKey('Tax', on_delete=models.SET_NULL, null=True, blank=True)
+    client_address = models.TextField(blank=True)
+    billing_address = models.TextField(blank=True)
+    estimate_date = models.DateField()
+    expiry_date = models.DateField()
+    discount = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    other_info = models.TextField(blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Estimate #{self.id} - {self.client.name}"
+
+class EstimateItem(models.Model):
+    estimate = models.ForeignKey(Estimate, on_delete=models.CASCADE, related_name='items')
+    item = models.CharField(max_length=200)
+    description = models.CharField(max_length=300, blank=True)
+    unit_cost = models.DecimalField(max_digits=10, decimal_places=2)
+    quantity = models.PositiveIntegerField(default=1)
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.item} ({self.estimate})"
+
+class Invoice(models.Model):
+    STATUS_CHOICES = [
+        ('draft', 'Draft'),
+        ('sent', 'Sent'),
+        ('paid', 'Paid'),
+        ('overdue', 'Overdue'),
+        ('cancelled', 'Cancelled'),
+    ]
+    client = models.ForeignKey('Client', on_delete=models.CASCADE)
+    project = models.ForeignKey('Project', on_delete=models.SET_NULL, null=True, blank=True)
+    tax = models.ForeignKey('Tax', on_delete=models.SET_NULL, null=True, blank=True)
+    client_address = models.TextField(blank=True)
+    billing_address = models.TextField(blank=True)
+    invoice_date = models.DateField()
+    due_date = models.DateField()
+    discount = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    other_info = models.TextField(blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Invoice #{self.id} - {self.client.name}"
+
+class InvoiceItem(models.Model):
+    invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE, related_name='items')
+    item = models.CharField(max_length=200)
+    description = models.CharField(max_length=300, blank=True)
+    unit_cost = models.DecimalField(max_digits=10, decimal_places=2)
+    quantity = models.PositiveIntegerField(default=1)
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.item} ({self.invoice})"

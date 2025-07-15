@@ -1,0 +1,43 @@
+{% extends 'core/base.html' %}
+{% block page_title %}Invoices{% endblock %}
+{% block content %}
+<div class="card mt-4">
+  <div class="card-body">
+    <h4 class="card-title mb-4">Invoices</h4>
+    <a href="{% url 'add_invoice' %}" class="btn btn-primary mb-3">Add Invoice</a>
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Client</th>
+            <th>Project</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Total</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for invoice in invoices %}
+          <tr>
+            <td>{{ invoice.id }}</td>
+            <td><a href="{% url 'client_list' %}">{{ invoice.client.name }}</a></td>
+            <td>{% if invoice.project %}<a href="{% url 'project_detail' invoice.project.id %}">{{ invoice.project.name }}</a>{% else %}N/A{% endif %}</td>
+            <td>{{ invoice.invoice_date }}</td>
+            <td>{{ invoice.get_status_display }}</td>
+            <td>{{ invoice.total_amount }}</td>
+            <td>
+              <a href="{% url 'edit_invoice' invoice.id %}" class="btn btn-sm btn-outline-primary">Edit</a>
+              <a href="{% url 'delete_invoice' invoice.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="7">No invoices found.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %} 

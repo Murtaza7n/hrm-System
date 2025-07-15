@@ -1,0 +1,15 @@
+{% extends 'core/base.html' %}
+{% block page_title %}Delete User{% endblock %}
+{% block content %}
+<div class="card mt-4">
+  <div class="card-body">
+    <h4 class="card-title">Delete User</h4>
+    <p>Are you sure you want to delete user <strong>{{ user_obj.username }}</strong>?</p>
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger">Yes, Delete</button>
+      <a href="{% url 'admin_user_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %} 
