@@ -1,0 +1,47 @@
+{% extends 'core/base.html' %}
+{% block page_title %}{{ action }} Budget Expense{% endblock %}
+{% block content %}
+<div class="card mt-4">
+  <div class="card-body">
+    <h4 class="card-title">{{ action }} Budget Expense</h4>
+    <form method="post" enctype="multipart/form-data">{% csrf_token %}
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="id_title" class="form-label">Title *</label>
+          {{ form.title }}
+        </div>
+        <div class="col-md-6">
+          <label for="id_budget" class="form-label">Budget *</label>
+          {{ form.budget }}
+        </div>
+      </div>
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="id_amount" class="form-label">Amount *</label>
+          {{ form.amount }}
+        </div>
+        <div class="col-md-6">
+          <label for="id_attachment" class="form-label">Attachment</label>
+          {{ form.attachment }}
+        </div>
+      </div>
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="id_start_date" class="form-label">Start Date</label>
+          {{ form.start_date }}
+        </div>
+        <div class="col-md-6">
+          <label for="id_end_date" class="form-label">End Date</label>
+          {{ form.end_date }}
+        </div>
+      </div>
+      <div class="mb-3">
+        <label for="id_description" class="form-label">Note</label>
+        {{ form.description }}
+      </div>
+      <button type="submit" class="btn btn-success">{{ action }}</button>
+      <a href="{% url 'budget_expense_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %} 

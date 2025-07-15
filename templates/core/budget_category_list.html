@@ -1,0 +1,33 @@
+{% extends 'core/base.html' %}
+{% block page_title %}Budget Categories{% endblock %}
+{% block content %}
+<div class="card mt-4">
+  <div class="card-body">
+    <h4 class="card-title">Budget Categories</h4>
+    <a href="{% url 'budget_category_add' %}" class="btn btn-primary mb-3">Add Category</a>
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for cat in categories %}
+        <tr>
+          <td>{{ cat.name }}</td>
+          <td>{{ cat.description }}</td>
+          <td>
+            <a href="{% url 'budget_category_edit' cat.pk %}" class="btn btn-sm btn-warning">Edit</a>
+            <a href="{% url 'budget_category_delete' cat.pk %}" class="btn btn-sm btn-danger">Delete</a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="3">No categories found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %} 

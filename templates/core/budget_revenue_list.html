@@ -1,0 +1,41 @@
+{% extends 'core/base.html' %}
+{% block page_title %}Budget Revenues{% endblock %}
+{% block content %}
+<div class="card mt-4">
+  <div class="card-body">
+    <h4 class="card-title">Budget Revenues</h4>
+    <a href="{% url 'budget_revenue_add' %}" class="btn btn-primary mb-3">Add Revenue</a>
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Budget</th>
+          <th>Amount</th>
+          <th>Start Date</th>
+          <th>End Date</th>
+          <th>Attachment</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for revenue in revenues %}
+        <tr>
+          <td>{{ revenue.title }}</td>
+          <td>{{ revenue.budget.name }}</td>
+          <td>{{ revenue.amount }}</td>
+          <td>{{ revenue.start_date }}</td>
+          <td>{{ revenue.end_date }}</td>
+          <td>{% if revenue.attachment %}<a href="{{ revenue.attachment.url }}" target="_blank">View</a>{% else %}-{% endif %}</td>
+          <td>
+            <a href="{% url 'budget_revenue_edit' revenue.pk %}" class="btn btn-sm btn-warning">Edit</a>
+            <a href="{% url 'budget_revenue_delete' revenue.pk %}" class="btn btn-sm btn-danger">Delete</a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7">No revenues found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %} 

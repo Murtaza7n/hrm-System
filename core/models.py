@@ -207,3 +207,82 @@ class Task(models.Model):
 
     def __str__(self):
         return f"{self.title} ({self.status}) for {self.assigned_to}"
+
+class BudgetCategory(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True)
+
+    def __str__(self):
+        return self.name
+
+class Budget(models.Model):
+    TYPE_CHOICES = [
+        ('project', 'Project'),
+        ('category', 'Category'),
+    ]
+    type = models.CharField(max_length=20, choices=TYPE_CHOICES, default='project')
+    name = models.CharField(max_length=100)
+    category = models.ForeignKey(BudgetCategory, on_delete=models.CASCADE, related_name='budgets', null=True, blank=True)
+    project = models.ForeignKey('Project', on_delete=models.SET_NULL, null=True, blank=True, related_name='budgets')
+    tax = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    period_start = models.DateField()
+    period_end = models.DateField()
+    attachment = models.FileField(upload_to='budget_attachments/', null=True, blank=True)
+    note = models.TextField(blank=True)
+    # amount is now calculated, not user input
+
+    def __str__(self):
+        return f"{self.name} ({self.get_type_display()})"
+
+class BudgetExpense(models.Model):
+    budget = models.ForeignKey(Budget, on_delete=models.CASCADE, related_name='expenses')
+    title = models.CharField(max_length=100)
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    description = models.TextField(blank=True)
+    date = models.DateField(default=timezone.now)
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
+    attachment = models.FileField(upload_to='budget_expense_attachments/', null=True, blank=True)
+
+    def __str__(self):
+        return f"Expense: {self.title} ({self.amount}) for {self.budget.name}"
+
+class BudgetRevenue(models.Model):
+    budget = models.ForeignKey(Budget, on_delete=models.CASCADE, related_name='revenues')
+    title = models.CharField(max_length=100)
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    description = models.TextField(blank=True)
+    date = models.DateField(default=timezone.now)
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
+    attachment = models.FileField(upload_to='budget_revenue_attachments/', null=True, blank=True)
+
+    def __str__(self):
+        return f"Revenue: {self.title} ({self.amount}) for {self.budget.name}"
+
+class Asset(models.Model):
+    STATUS_CHOICES = [
+        ('approved', 'Approved'),
+        ('pending', 'Pending'),
+        ('returned', 'Returned'),
+    ]
+    asset_name = models.CharField(max_length=255)
+    asset_id = models.CharField(max_length=100, unique=True)
+    purchase_date = models.DateField(null=True, blank=True)
+    purchase_from = models.CharField(max_length=255, blank=True)
+    manufacturer = models.CharField(max_length=255, blank=True)
+    model = models.CharField(max_length=255, blank=True)
+    serial_number = models.CharField(max_length=255, blank=True)
+    brand = models.CharField(max_length=255, blank=True)
+    supplier = models.CharField(max_length=255, blank=True)
+    condition = models.CharField(max_length=255, blank=True)
+    warranty = models.CharField(max_length=100, blank=True)
+    warranty_end = models.DateField(null=True, blank=True)
+    cost = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    asset_user = models.ForeignKey('Employee', on_delete=models.SET_NULL, null=True, blank=True, related_name='assets')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='approved')
+    description = models.TextField(blank=True)
+    files = models.FileField(upload_to='asset_files/', null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.asset_name} ({self.asset_id})"

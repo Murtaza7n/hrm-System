@@ -193,6 +193,28 @@
                             </li>
                             {% endif %}
                         {% endif %}
+                        {% if user.is_superuser %}
+                        <li class="nav-item">
+                            <a class="nav-link text-white" data-bs-toggle="collapse" href="#accountingMenu" role="button" aria-expanded="false" aria-controls="accountingMenu">
+                                <i class="fas fa-file-invoice-dollar me-2"></i>Accounting
+                            </a>
+                            <div class="collapse" id="accountingMenu">
+                                <ul class="nav flex-column ms-3">
+                                    <li class="nav-item"><a class="nav-link text-white" href="{% url 'budget_category_list' %}">Categories</a></li>
+                                    <li class="nav-item"><a class="nav-link text-white" href="{% url 'budget_list' %}">Budgets</a></li>
+                                    <li class="nav-item"><a class="nav-link text-white" href="{% url 'budget_expense_list' %}">Budget Expenses</a></li>
+                                    <li class="nav-item"><a class="nav-link text-white" href="{% url 'budget_revenue_list' %}">Budget Revenue</a></li>
+                                </ul>
+                            </div>
+                        </li>
+                        {% endif %}
+                        {% if user.is_superuser %}
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="{% url 'asset_list' %}">
+                                <i class="fas fa-boxes me-2"></i>Assets
+                            </a>
+                        </li>
+                        {% endif %}
                         <!-- Client Button End -->
                         <!-- Payroll menu removed: no corresponding views/URLs exist -->
                         {% if not user.is_superuser and user.employee and user.employee.designation.name != 'Project Manager' %}

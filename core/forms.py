@@ -1,5 +1,5 @@
 from django import forms
-from .models import Client, Project, Employee, Department, Task
+from .models import Client, Project, Employee, Department, Task, BudgetCategory, Budget, BudgetExpense, BudgetRevenue, Asset
 from django.contrib.auth.models import User
 from django.utils.html import format_html
 
@@ -76,3 +76,40 @@ class TaskForm(forms.ModelForm):
             self.fields['assigned_to'].queryset = Employee.objects.exclude(id=manager.id)
         else:
             self.fields['assigned_to'].queryset = Employee.objects.all() 
+
+class BudgetCategoryForm(forms.ModelForm):
+    class Meta:
+        model = BudgetCategory
+        fields = ['name', 'description'] 
+
+class BudgetForm(forms.ModelForm):
+    period_start = forms.DateField(widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}))
+    period_end = forms.DateField(widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}))
+    class Meta:
+        model = Budget
+        fields = ['type', 'name', 'category', 'project', 'tax', 'period_start', 'period_end', 'attachment', 'note'] 
+
+class BudgetExpenseForm(forms.ModelForm):
+    start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}), required=False)
+    end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}), required=False)
+    class Meta:
+        model = BudgetExpense
+        fields = ['title', 'budget', 'amount', 'description', 'start_date', 'end_date', 'attachment'] 
+
+class BudgetRevenueForm(forms.ModelForm):
+    start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}), required=False)
+    end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}), required=False)
+    class Meta:
+        model = BudgetRevenue
+        fields = ['title', 'budget', 'amount', 'description', 'start_date', 'end_date', 'attachment'] 
+
+class AssetForm(forms.ModelForm):
+    purchase_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}), required=False)
+    warranty_end = forms.DateField(widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}), required=False)
+    class Meta:
+        model = Asset
+        fields = ['asset_name', 'asset_id', 'purchase_date', 'purchase_from', 'manufacturer', 'model', 'serial_number', 'brand', 'supplier', 'condition', 'warranty', 'warranty_end', 'cost', 'asset_user', 'status', 'description', 'files']
+        widgets = {
+            'status': forms.Select(attrs={'class': 'form-control'}),
+            'asset_user': forms.Select(attrs={'class': 'form-control'}),
+        } 

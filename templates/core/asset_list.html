@@ -1,0 +1,43 @@
+{% extends 'core/base.html' %}
+{% block page_title %}Assets{% endblock %}
+{% block content %}
+<div class="card mt-4">
+  <div class="card-body">
+    <h4 class="card-title">Assets</h4>
+    <a href="{% url 'asset_add' %}" class="btn btn-primary mb-3">Add Asset</a>
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Asset Name</th>
+          <th>Asset ID</th>
+          <th>Purchase Date</th>
+          <th>Brand</th>
+          <th>Model</th>
+          <th>Asset User</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for asset in assets %}
+        <tr>
+          <td>{{ asset.asset_name }}</td>
+          <td>{{ asset.asset_id }}</td>
+          <td>{{ asset.purchase_date }}</td>
+          <td>{{ asset.brand }}</td>
+          <td>{{ asset.model }}</td>
+          <td>{% if asset.asset_user %}{{ asset.asset_user.user.get_full_name|default:asset.asset_user.user.username }}{% endif %}</td>
+          <td>{{ asset.get_status_display }}</td>
+          <td>
+            <a href="{% url 'asset_edit' asset.pk %}" class="btn btn-sm btn-warning">Edit</a>
+            <a href="{% url 'asset_delete' asset.pk %}" class="btn btn-sm btn-danger">Delete</a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="8">No assets found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %} 

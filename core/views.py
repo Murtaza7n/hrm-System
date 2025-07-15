@@ -22,6 +22,16 @@ from .forms import TaskForm
 from .models import Task
 from django.urls import reverse
 from django.http import HttpResponseForbidden
+from .models import BudgetCategory
+from .forms import BudgetCategoryForm
+from .forms import BudgetForm
+from .models import Budget
+from .forms import BudgetExpenseForm
+from .models import BudgetExpense
+from .forms import BudgetRevenueForm
+from .models import BudgetRevenue
+from .forms import AssetForm
+from .models import Asset
 
 def login_view(request):
     if request.method == 'POST':
@@ -46,10 +56,9 @@ def is_employee(user):
 
 @user_passes_test(is_admin)
 def dashboard(request):
-    # Admin dashboard: show all graphs and summary counts
     from django.db.models import Count, Sum
+    from django.db.models.functions import TruncMonth
     attendance_stats = Attendance.objects.values('status').annotate(count=Count('id'))
-    # Department bar chart: all departments and their employee counts
     dept_counts = Department.objects.annotate(emp_count=Count('employee')).values('name', 'emp_count')
     desig_counts = Designation.objects.annotate(emp_count=Count('employee')).values('name', 'emp_count')
     salary_stats = None
@@ -59,18 +68,35 @@ def dashboard(request):
         pass
     total_employees = Employee.objects.count()
     total_departments = Department.objects.count()
-    from .models import Ticket
+    total_projects = Project.objects.count()
     total_tickets = Ticket.objects.count()
     total_clients = Client.objects.count()
+    # Expenses by month
+    expense_stats = (
+        BudgetExpense.objects.annotate(month=TruncMonth('date'))
+        .values('month')
+        .annotate(total=Sum('amount'))
+        .order_by('month')
+    )
+    # Revenues by month
+    revenue_stats = (
+        BudgetRevenue.objects.annotate(month=TruncMonth('date'))
+        .values('month')
+        .annotate(total=Sum('amount'))
+        .order_by('month')
+    )
     return render(request, 'core/dashboard.html', {
         'attendance_stats': list(attendance_stats),
-        'dept_counts': list(dept_counts),  # single graph for all departments
+        'dept_counts': list(dept_counts),
         'desig_counts': list(desig_counts),
         'salary_stats': list(salary_stats) if salary_stats else None,
         'total_employees': total_employees,
         'total_departments': total_departments,
+        'total_projects': total_projects,
         'total_tickets': total_tickets,
         'total_clients': total_clients,
+        'expense_stats': list(expense_stats),
+        'revenue_stats': list(revenue_stats),
     })
 
 @user_passes_test(is_admin)
@@ -688,3 +714,195 @@ def delete_task(request, task_id):
         task.delete()
         return redirect('project_tasks', project_id=project_id)
     return render(request, 'core/delete_task.html', {'task': task})
+
+@user_passes_test(is_admin)
+def budget_category_list(request):
+    categories = BudgetCategory.objects.all()
+    return render(request, 'core/budget_category_list.html', {'categories': categories})
+
+@user_passes_test(is_admin)
+def budget_category_add(request):
+    if request.method == 'POST':
+        form = BudgetCategoryForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('budget_category_list')
+    else:
+        form = BudgetCategoryForm()
+    return render(request, 'core/budget_category_form.html', {'form': form, 'action': 'Add'})
+
+@user_passes_test(is_admin)
+def budget_category_edit(request, pk):
+    category = get_object_or_404(BudgetCategory, pk=pk)
+    if request.method == 'POST':
+        form = BudgetCategoryForm(request.POST, instance=category)
+        if form.is_valid():
+            form.save()
+            return redirect('budget_category_list')
+    else:
+        form = BudgetCategoryForm(instance=category)
+    return render(request, 'core/budget_category_form.html', {'form': form, 'action': 'Edit'})
+
+@user_passes_test(is_admin)
+def budget_category_delete(request, pk):
+    category = get_object_or_404(BudgetCategory, pk=pk)
+    if request.method == 'POST':
+        category.delete()
+        return redirect('budget_category_list')
+    return render(request, 'core/budget_category_confirm_delete.html', {'category': category})
+
+def budget_categories(request):
+    return render(request, 'core/budget_categories.html')
+
+@user_passes_test(is_admin)
+def budget_list(request):
+    budgets = Budget.objects.select_related('category').all()
+    return render(request, 'core/budget_list.html', {'budgets': budgets})
+
+@user_passes_test(is_admin)
+def budget_add(request):
+    if request.method == 'POST':
+        form = BudgetForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('budget_list')
+    else:
+        form = BudgetForm()
+    return render(request, 'core/budget_form.html', {'form': form, 'action': 'Add'})
+
+@user_passes_test(is_admin)
+def budget_edit(request, pk):
+    budget = get_object_or_404(Budget, pk=pk)
+    if request.method == 'POST':
+        form = BudgetForm(request.POST, instance=budget)
+        if form.is_valid():
+            form.save()
+            return redirect('budget_list')
+    else:
+        form = BudgetForm(instance=budget)
+    return render(request, 'core/budget_form.html', {'form': form, 'action': 'Edit'})
+
+@user_passes_test(is_admin)
+def budget_delete(request, pk):
+    budget = get_object_or_404(Budget, pk=pk)
+    if request.method == 'POST':
+        budget.delete()
+        return redirect('budget_list')
+    return render(request, 'core/budget_confirm_delete.html', {'budget': budget})
+
+def budgets(request):
+    return render(request, 'core/budgets.html')
+
+@user_passes_test(is_admin)
+def budget_expense_list(request):
+    expenses = BudgetExpense.objects.select_related('budget').all()
+    return render(request, 'core/budget_expense_list.html', {'expenses': expenses})
+
+@user_passes_test(is_admin)
+def budget_expense_add(request):
+    if request.method == 'POST':
+        form = BudgetExpenseForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('budget_expense_list')
+    else:
+        form = BudgetExpenseForm()
+    return render(request, 'core/budget_expense_form.html', {'form': form, 'action': 'Add'})
+
+@user_passes_test(is_admin)
+def budget_expense_edit(request, pk):
+    expense = get_object_or_404(BudgetExpense, pk=pk)
+    if request.method == 'POST':
+        form = BudgetExpenseForm(request.POST, request.FILES, instance=expense)
+        if form.is_valid():
+            form.save()
+            return redirect('budget_expense_list')
+    else:
+        form = BudgetExpenseForm(instance=expense)
+    return render(request, 'core/budget_expense_form.html', {'form': form, 'action': 'Edit'})
+
+@user_passes_test(is_admin)
+def budget_expense_delete(request, pk):
+    expense = get_object_or_404(BudgetExpense, pk=pk)
+    if request.method == 'POST':
+        expense.delete()
+        return redirect('budget_expense_list')
+    return render(request, 'core/budget_expense_confirm_delete.html', {'expense': expense})
+
+def budget_expense(request):
+    return render(request, 'core/budget_expense.html')
+
+@user_passes_test(is_admin)
+def budget_revenue_list(request):
+    revenues = BudgetRevenue.objects.select_related('budget').all()
+    return render(request, 'core/budget_revenue_list.html', {'revenues': revenues})
+
+@user_passes_test(is_admin)
+def budget_revenue_add(request):
+    if request.method == 'POST':
+        form = BudgetRevenueForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('budget_revenue_list')
+    else:
+        form = BudgetRevenueForm()
+    return render(request, 'core/budget_revenue_form.html', {'form': form, 'action': 'Add'})
+
+@user_passes_test(is_admin)
+def budget_revenue_edit(request, pk):
+    revenue = get_object_or_404(BudgetRevenue, pk=pk)
+    if request.method == 'POST':
+        form = BudgetRevenueForm(request.POST, request.FILES, instance=revenue)
+        if form.is_valid():
+            form.save()
+            return redirect('budget_revenue_list')
+    else:
+        form = BudgetRevenueForm(instance=revenue)
+    return render(request, 'core/budget_revenue_form.html', {'form': form, 'action': 'Edit'})
+
+@user_passes_test(is_admin)
+def budget_revenue_delete(request, pk):
+    revenue = get_object_or_404(BudgetRevenue, pk=pk)
+    if request.method == 'POST':
+        revenue.delete()
+        return redirect('budget_revenue_list')
+    return render(request, 'core/budget_revenue_confirm_delete.html', {'revenue': revenue})
+
+def budget_revenue(request):
+    return render(request, 'core/budget_revenue.html')
+
+@user_passes_test(is_admin)
+def asset_list(request):
+    assets = Asset.objects.select_related('asset_user').all()
+    return render(request, 'core/asset_list.html', {'assets': assets})
+
+@user_passes_test(is_admin)
+def asset_add(request):
+    if request.method == 'POST':
+        form = AssetForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('asset_list')
+    else:
+        form = AssetForm()
+    return render(request, 'core/asset_form.html', {'form': form, 'action': 'Add'})
+
+@user_passes_test(is_admin)
+def asset_edit(request, pk):
+    asset = get_object_or_404(Asset, pk=pk)
+    if request.method == 'POST':
+        form = AssetForm(request.POST, request.FILES, instance=asset)
+        if form.is_valid():
+            form.save()
+            return redirect('asset_list')
+    else:
+        form = AssetForm(instance=asset)
+    return render(request, 'core/asset_form.html', {'form': form, 'action': 'Edit'})
+
+@user_passes_test(is_admin)
+def asset_delete(request, pk):
+    asset = get_object_or_404(Asset, pk=pk)
+    if request.method == 'POST':
+        asset.delete()
+        return redirect('asset_list')
+    return render(request, 'core/asset_confirm_delete.html', {'asset': asset})

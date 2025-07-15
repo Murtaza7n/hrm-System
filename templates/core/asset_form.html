@@ -1,0 +1,97 @@
+{% extends 'core/base.html' %}
+{% block page_title %}{{ action }} Asset{% endblock %}
+{% block content %}
+<div class="card mt-4">
+  <div class="card-body">
+    <h4 class="card-title">{{ action }} Asset</h4>
+    <form method="post" enctype="multipart/form-data">{% csrf_token %}
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="id_asset_name" class="form-label">Asset Name</label>
+          {{ form.asset_name }}
+        </div>
+        <div class="col-md-6">
+          <label for="id_asset_id" class="form-label">Asset Id</label>
+          {{ form.asset_id }}
+        </div>
+      </div>
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="id_purchase_date" class="form-label">Purchase Date</label>
+          {{ form.purchase_date }}
+        </div>
+        <div class="col-md-6">
+          <label for="id_purchase_from" class="form-label">Purchase From</label>
+          {{ form.purchase_from }}
+        </div>
+      </div>
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="id_manufacturer" class="form-label">Manufacturer</label>
+          {{ form.manufacturer }}
+        </div>
+        <div class="col-md-6">
+          <label for="id_model" class="form-label">Model</label>
+          {{ form.model }}
+        </div>
+      </div>
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="id_serial_number" class="form-label">Serial Number</label>
+          {{ form.serial_number }}
+        </div>
+        <div class="col-md-6">
+          <label for="id_brand" class="form-label">Brand</label>
+          {{ form.brand }}
+        </div>
+      </div>
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="id_supplier" class="form-label">Supplier</label>
+          {{ form.supplier }}
+        </div>
+        <div class="col-md-6">
+          <label for="id_condition" class="form-label">Condition</label>
+          {{ form.condition }}
+        </div>
+      </div>
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="id_warranty" class="form-label">Warranty</label>
+          {{ form.warranty }}
+        </div>
+        <div class="col-md-6">
+          <label for="id_warranty_end" class="form-label">Warranty End</label>
+          {{ form.warranty_end }}
+        </div>
+      </div>
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="id_cost" class="form-label">Cost</label>
+          {{ form.cost }}
+        </div>
+        <div class="col-md-6">
+          <label for="id_asset_user" class="form-label">Asset user</label>
+          {{ form.asset_user }}
+        </div>
+      </div>
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="id_status" class="form-label">Status</label>
+          {{ form.status }}
+        </div>
+        <div class="col-md-6">
+          <label for="id_files" class="form-label">Files</label>
+          {{ form.files }}
+        </div>
+      </div>
+      <div class="mb-3">
+        <label for="id_description" class="form-label">Description</label>
+        {{ form.description }}
+      </div>
+      <button type="submit" class="btn btn-success">{{ action }}</button>
+      <a href="{% url 'asset_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %} 
