@@ -131,6 +131,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+
+STATIC_ROOT = BASE_DIR / 'staticfiles'  # <-- Add this line to fix collectstatic issue
+
 STATICFILES_DIRS = [BASE_DIR / 'static']  # Add global static directory
 
 MEDIA_URL = '/media/'
