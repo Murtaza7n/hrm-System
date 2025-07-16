@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import login_required, user_passes_test, permission_required
 from django.contrib import messages
 from .models import Employee, Department, Designation, Attendance, Ticket, Client, Holiday, Leave
 from django.contrib.auth.models import User
@@ -51,8 +51,9 @@ from .models import Estimate, EstimateItem
 from .forms import EstimateForm, EstimateItemForm
 from .forms import InvoiceForm, InvoiceItemForm
 from .models import Invoice, InvoiceItem
-from .models import EmployeePermission
-from core.templatetags.core_extras import user_has_permission
+from django.http import HttpResponse
+from django.contrib.admin.views.decorators import staff_member_required
+
 
 def login_view(request):
     if request.method == 'POST':
@@ -236,18 +237,26 @@ def delete_designation(request, designation_id):
     Designation.objects.filter(id=designation_id).delete()
     return redirect('manage_designations')
 
+@permission_required('core.view_department', raise_exception=True)
 @login_required
 def my_department(request):
     try:
-        department = request.user.employee.department
+        employee = request.user.employee
+        if not employee.can_view_department:
+            return HttpResponse('You are restricted from accessing department.', status=403)
+        department = employee.department
     except Exception:
         department = None
     return render(request, 'core/my_department.html', {'department': department})
 
+@permission_required('core.view_designation', raise_exception=True)
 @login_required
 def my_designation(request):
     try:
-        designation = request.user.employee.designation
+        employee = request.user.employee
+        if not employee.can_view_designation:
+            return HttpResponse('You are restricted from accessing designation.', status=403)
+        designation = employee.designation
     except Exception:
         designation = None
     return render(request, 'core/my_designation.html', {'designation': designation})
@@ -300,15 +309,11 @@ def chat_user_list(request):
 
 @login_required
 def my_tickets(request):
-    if not user_has_permission(request.user, 'tickets', 'view'):
-        return HttpResponseForbidden('You do not have permission to view tickets.')
     tickets = Ticket.objects.filter(created_by=request.user).order_by('-created_at')
     return render(request, 'core/my_tickets.html', {'tickets': tickets})
 
 @login_required
 def submit_ticket(request):
-    if not user_has_permission(request.user, 'tickets', 'edit'):
-        return HttpResponseForbidden('You do not have permission to submit tickets.')
     if request.method == 'POST':
         title = request.POST.get('title')
         description = request.POST.get('description')
@@ -332,8 +337,6 @@ def update_ticket_status(request, ticket_id):
 
 @login_required
 def delete_ticket(request, ticket_id):
-    if not user_has_permission(request.user, 'tickets', 'delete'):
-        return HttpResponseForbidden('You do not have permission to delete tickets.')
     ticket = Ticket.objects.get(id=ticket_id)
     if request.user.is_superuser or ticket.created_by == request.user:
         ticket.delete()
@@ -350,10 +353,15 @@ def delete_ticket(request, ticket_id):
 
 @login_required
 def my_attendance(request):
+    try:
+        employee = request.user.employee
+        if not employee.can_view_attendance:
+            return HttpResponse('You are restricted from accessing attendance.', status=403)
+    except Exception:
+        return HttpResponse('You are restricted from accessing attendance.', status=403)
     today = timezone.now().date()
     records = Attendance.objects.filter(user=request.user).order_by('-date')
-    today_record = records.filter(date=today).first()
-    # Remove can_view_attendance permission check
+    today_record = Attendance.objects.filter(user=request.user, date=today).first()
     if request.method == 'POST':
         if not today_record:
             check_in = timezone.now().time()
@@ -432,6 +440,12 @@ def delete_holiday(request, holiday_id):
 
 @login_required
 def holidays(request):
+    try:
+        employee = request.user.employee
+        if not employee.can_view_holidays:
+            return HttpResponse('You are restricted from accessing holidays.', status=403)
+    except Exception:
+        return HttpResponse('You are restricted from accessing holidays.', status=403)
     holidays = Holiday.objects.all()
     return render(request, 'core/holidays.html', {'holidays': holidays})
 
@@ -444,8 +458,10 @@ class LeaveForm(ModelForm):
 def apply_leave(request):
     try:
         employee = request.user.employee
-    except Employee.DoesNotExist:
-        return render(request, 'core/no_employee.html')
+        if not employee.can_view_leaves:
+            return HttpResponse('You are restricted from accessing leaves.', status=403)
+    except Exception:
+        return HttpResponse('You are restricted from accessing leaves.', status=403)
     if request.method == 'POST':
         form = LeaveForm(request.POST)
         if form.is_valid():
@@ -461,8 +477,10 @@ def apply_leave(request):
 def my_leaves(request):
     try:
         employee = request.user.employee
-    except Employee.DoesNotExist:
-        return render(request, 'core/no_employee.html')
+        if not employee.can_view_leaves:
+            return HttpResponse('You are restricted from accessing leaves.', status=403)
+    except Exception:
+        return HttpResponse('You are restricted from accessing leaves.', status=403)
     leaves = Leave.objects.filter(employee=employee).order_by('-applied_at')
     return render(request, 'core/my_leaves.html', {'leaves': leaves})
 
@@ -627,9 +645,9 @@ def delete_project(request, project_id):
 @login_required
 def assign_task(request, project_id):
     project = get_object_or_404(Project, id=project_id)
-    # Only project manager or admin can assign tasks
-    if not (request.user.is_superuser or (project.manager and project.manager.user == request.user)):
-        return HttpResponseForbidden('You do not have permission to assign tasks for this project.')
+    # Permission check
+    if not request.user.is_superuser and not (project.manager and project.manager.user == request.user):
+        return HttpResponseForbidden('You do not have permission to assign tasks.')
     manager = project.manager if project.manager else None
     if request.method == 'POST':
         form = TaskForm(request.POST, project=project, manager=manager)
@@ -646,9 +664,9 @@ def assign_task(request, project_id):
 @login_required
 def project_tasks(request, project_id):
     project = get_object_or_404(Project, id=project_id)
-    # Only project manager or admin can view all tasks
-    if not (request.user.is_superuser or (project.manager and project.manager.user == request.user)):
-        return HttpResponseForbidden('You do not have permission to view tasks for this project.')
+    # Permission check
+    if not request.user.is_superuser and not (project.manager and project.manager.user == request.user):
+        return HttpResponseForbidden('You do not have permission to view tasks.')
     tasks = Task.objects.filter(project=project).select_related('assigned_to')
     return render(request, 'core/project_tasks.html', {'project': project, 'tasks': tasks})
 
@@ -656,6 +674,8 @@ def project_tasks(request, project_id):
 def my_tasks(request):
     try:
         employee = request.user.employee
+        if not employee.can_view_tasks:
+            return HttpResponse('You are restricted from accessing tasks.', status=403)
     except Employee.DoesNotExist:
         return render(request, 'core/no_employee.html')
     tasks = Task.objects.filter(assigned_to=employee).select_related('project', 'assigned_by')
@@ -1253,21 +1273,25 @@ def permissions(request):
                 )
                 permissions[employee.id][module][action] = perm
     if request.method == 'POST' and is_admin:
+        # First, handle locking/unlocking
         for key, value in request.POST.items():
-            if key.startswith('perm_'):
-                _, emp_id, module, action = key.split('_')
+            if key.startswith('toggle_lock_'):
+                _, emp_id, module, action = key.split('_', 3)
                 perm = EmployeePermission.objects.get(
                     employee_id=emp_id, module=module, action=action
                 )
-                perm.allowed = (value == 'on')
+                perm.locked = not perm.locked
                 perm.save()
-            if key.startswith('lock_'):
-                _, emp_id, module, action = key.split('_')
-                perm = EmployeePermission.objects.get(
-                    employee_id=emp_id, module=module, action=action
-                )
-                perm.locked = (value == 'on')
-                perm.save()
+                return redirect('permissions')
+        # Now, handle allowed checkboxes robustly
+        for employee in employees:
+            for module in modules:
+                for action in actions:
+                    perm = permissions[employee.id][module][action]
+                    checkbox_name = f"perm_{employee.id}_{module}_{action}"
+                    # If present in POST, set allowed True, else False
+                    perm.allowed = (checkbox_name in request.POST)
+                    perm.save()
         return redirect('permissions')
     return render(request, 'core/permissions.html', {
         'employees': employees,
@@ -1275,4 +1299,29 @@ def permissions(request):
         'actions': actions,
         'permissions': permissions,
         'is_admin': is_admin,
+    })
+
+@staff_member_required
+def permissions_management(request):
+    from .models import Employee
+    features = [
+        ('can_view_attendance', 'Attendance'),
+        ('can_view_tasks', 'Tasks'),
+        ('can_view_department', 'Department'),
+        ('can_view_designation', 'Designation'),
+        ('can_view_holidays', 'Holidays'),
+        ('can_view_leaves', 'Leaves'),
+    ]
+    employees = Employee.objects.select_related('user').all()
+    if request.method == 'POST':
+        for employee in employees:
+            for field, _ in features:
+                key = f"{employee.id}_{field}"
+                value = request.POST.get(key) == 'on'
+                setattr(employee, field, value)
+            employee.save()
+        return redirect('permissions_management')
+    return render(request, 'core/permissions.html', {
+        'employees': employees,
+        'features': features,
     })

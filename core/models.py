@@ -27,6 +27,13 @@ class Employee(models.Model):
     phone = models.CharField(max_length=20, blank=True)
     address = models.TextField(blank=True)
     date_of_joining = models.DateField(null=True, blank=True)
+    is_restricted = models.BooleanField(default=False)
+    can_view_attendance = models.BooleanField(default=True)
+    can_view_tasks = models.BooleanField(default=True)
+    can_view_department = models.BooleanField(default=True)
+    can_view_designation = models.BooleanField(default=True)
+    can_view_holidays = models.BooleanField(default=True)
+    can_view_leaves = models.BooleanField(default=True)
 
     def __str__(self):
         return str(self.user)
@@ -502,16 +509,3 @@ class InvoiceItem(models.Model):
 
     def __str__(self):
         return f"{self.item} ({self.invoice})"
-
-class EmployeePermission(models.Model):
-    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
-    module = models.CharField(max_length=50)
-    action = models.CharField(max_length=50)
-    allowed = models.BooleanField(default=False)
-    locked = models.BooleanField(default=False)
-
-    class Meta:
-        unique_together = ('employee', 'module', 'action')
-
-    def __str__(self):
-        return f"{self.employee} - {self.module} - {self.action}"

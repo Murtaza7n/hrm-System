@@ -157,8 +157,7 @@
                                 <i class="fas fa-tachometer-alt me-2"></i>Dashboard
                             </a>
                         </li>
-                        {% has_permission 'tickets' 'view' as can_view_tickets %}
-                        {% if can_view_tickets %}
+                        {% if user.is_superuser %}
                         <li class="nav-item">
                             <a class="nav-link text-white" href="{% url 'my_tickets' %}">
                                 <i class="fas fa-ticket-alt me-2"></i>Tickets
@@ -197,24 +196,20 @@
                         {% endif %}
                         {% if user.is_superuser %}
                         <li class="nav-item">
-                            <a class="nav-link text-white" href="{% url 'settings_main' %}">
-                                <i class="fas fa-cog me-2"></i>Settings
-                            </a>
-                        </li>
-                        {% endif %}
-                        {% if user.is_superuser %}
-                        <li class="nav-item">
-                            <a class="nav-link text-white" href="{% url 'permissions' %}">
+                            <a class="nav-link text-white" href="{% url 'permissions_management' %}">
                                 <i class="fas fa-lock me-2"></i>Permissions
                             </a>
                         </li>
                         {% endif %}
                         {% if user.is_superuser %}
                         <li class="nav-item">
-                            <a class="nav-link text-white" href="{% url 'permissions' %}">
-                                <i class="fas fa-lock me-2"></i>Roles & Permissions
+                            <a class="nav-link text-white" href="{% url 'settings_main' %}">
+                                <i class="fas fa-cog me-2"></i>Settings
                             </a>
                         </li>
+                        {% endif %}
+                        {% if user.is_superuser %}
+                        <!-- Permissions and Roles & Permissions links removed -->
                         {% endif %}
                         {% if user.is_superuser %}
                         <li class="nav-item">
