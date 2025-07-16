@@ -535,13 +535,27 @@ def edit_employee(request, employee_id):
 
 @user_passes_test(is_admin)
 def delete_employee(request, employee_id):
+    from django.contrib.auth.models import User
+    from django.db import transaction
     employee = Employee.objects.select_related('user').get(id=employee_id)
     user = employee.user
     if user == request.user:
         messages.warning(request, 'You cannot delete your own account while logged in.')
         return redirect('employee_list')
-    employee.delete()
-    user.delete()
+    # Delete all related objects for this user
+    with transaction.atomic():
+        for related_object in user._meta.get_fields():
+            if (related_object.one_to_many or related_object.one_to_one) and related_object.auto_created:
+                accessor_name = related_object.get_accessor_name()
+                related_manager = getattr(user, accessor_name, None)
+                if related_manager:
+                    if related_object.one_to_one:
+                        rel_obj = related_manager
+                        if rel_obj:
+                            rel_obj.delete()
+                    else:
+                        related_manager.all().delete()
+        user.delete()
     return redirect('employee_list')
 
 @require_POST
