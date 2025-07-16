@@ -502,3 +502,16 @@ class InvoiceItem(models.Model):
 
     def __str__(self):
         return f"{self.item} ({self.invoice})"
+
+class EmployeePermission(models.Model):
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    module = models.CharField(max_length=50)
+    action = models.CharField(max_length=50)
+    allowed = models.BooleanField(default=False)
+    locked = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ('employee', 'module', 'action')
+
+    def __str__(self):
+        return f"{self.employee} - {self.module} - {self.action}"

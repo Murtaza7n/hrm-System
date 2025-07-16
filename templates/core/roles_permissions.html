@@ -1,0 +1,80 @@
+{% extends 'core/base.html' %}
+{% load core_extras %}
+{% block page_title %}Permissions{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-md-3">
+      <div class="list-group mb-3">
+        {% for employee in employees %}
+          <a class="list-group-item list-group-item-action{% if forloop.first %} active{% endif %}" data-bs-toggle="tab" href="#emp{{ employee.id }}">{{ employee.user.get_full_name|default:employee.user.username }}</a>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="col-md-9">
+      <form method="post">
+        {% csrf_token %}
+        <div class="tab-content">
+          {% for employee in employees %}
+          <div class="tab-pane fade{% if forloop.first %} show active{% endif %}" id="emp{{ employee.id }}">
+            <h5 class="mb-3">Permissions for {{ employee.user.get_full_name|default:employee.user.username }}</h5>
+            <table class="table table-bordered align-middle">
+              <thead>
+                <tr>
+                  <th>Module</th>
+                  {% for action in actions %}
+                  <th class="text-center">{{ action|title }}</th>
+                  {% endfor %}
+                </tr>
+              </thead>
+              <tbody>
+                {% for module in modules %}
+                <tr>
+                  <td>{{ module|title }}</td>
+                  {% for action in actions %}
+                  {% with perm=permissions|dict_get:employee.id|dict_get:module|dict_get:action %}
+                  <td class="text-center">
+                    {% if perm.locked and not is_admin %}
+                      <span class="text-danger small">ask admin to unlock</span>
+                      <i class="fas fa-lock text-muted"></i>
+                    {% else %}
+                      <input type="checkbox" name="perm_{{ employee.id }}_{{ module }}_{{ action }}" {% if perm.allowed %}checked{% endif %} {% if perm.locked and not is_admin %}disabled{% endif %}>
+                    {% endif %}
+                    {% if is_admin %}
+                      <br>
+                      <input type="checkbox" name="lock_{{ employee.id }}_{{ module }}_{{ action }}" {% if perm.locked %}checked{% endif %}> <i class="fas fa-lock"></i> Lock
+                    {% endif %}
+                  </td>
+                  {% endwith %}
+                  {% endfor %}
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+            {% if is_admin %}
+            <div class="text-end mb-4">
+              <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<script>
+// Simple tab switching for employees
+const tabLinks = document.querySelectorAll('.list-group-item');
+const tabPanes = document.querySelectorAll('.tab-pane');
+tabLinks.forEach((link, idx) => {
+  link.addEventListener('click', function(e) {
+    e.preventDefault();
+    tabLinks.forEach(l => l.classList.remove('active'));
+    tabPanes.forEach(p => p.classList.remove('show', 'active'));
+    link.classList.add('active');
+    tabPanes[idx].classList.add('show', 'active');
+  });
+});
+</script>
+{% endblock %} 

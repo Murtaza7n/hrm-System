@@ -56,4 +56,5 @@ urlpatterns = [
     path('sales/estimates/delete/<int:estimate_id>/', views.delete_estimate, name='delete_estimate'),
     path('sales/invoices/edit/<int:invoice_id>/', views.edit_invoice, name='edit_invoice'),
     path('sales/invoices/delete/<int:invoice_id>/', views.delete_invoice, name='delete_invoice'),
+    path('permissions/', views.permissions, name='permissions'),
 ] 

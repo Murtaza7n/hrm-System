@@ -1,4 +1,5 @@
 {% load static %}
+{% load core_extras %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -156,11 +157,14 @@
                                 <i class="fas fa-tachometer-alt me-2"></i>Dashboard
                             </a>
                         </li>
+                        {% has_permission 'tickets' 'view' as can_view_tickets %}
+                        {% if can_view_tickets %}
                         <li class="nav-item">
-                            <a class="nav-link text-white" href="{% url user.is_superuser|yesno:'all_tickets,my_tickets' %}">
+                            <a class="nav-link text-white" href="{% url 'my_tickets' %}">
                                 <i class="fas fa-ticket-alt me-2"></i>Tickets
                             </a>
                         </li>
+                        {% endif %}
                         <li class="nav-item">
                             <a class="nav-link text-white" data-bs-toggle="collapse" href="#employeeMenu" role="button" aria-expanded="false" aria-controls="employeeMenu">
                                 <i class="fas fa-users me-2"></i>Employees
@@ -195,6 +199,20 @@
                         <li class="nav-item">
                             <a class="nav-link text-white" href="{% url 'settings_main' %}">
                                 <i class="fas fa-cog me-2"></i>Settings
+                            </a>
+                        </li>
+                        {% endif %}
+                        {% if user.is_superuser %}
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="{% url 'permissions' %}">
+                                <i class="fas fa-lock me-2"></i>Permissions
+                            </a>
+                        </li>
+                        {% endif %}
+                        {% if user.is_superuser %}
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="{% url 'permissions' %}">
+                                <i class="fas fa-lock me-2"></i>Roles & Permissions
                             </a>
                         </li>
                         {% endif %}

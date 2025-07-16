@@ -51,6 +51,8 @@ from .models import Estimate, EstimateItem
 from .forms import EstimateForm, EstimateItemForm
 from .forms import InvoiceForm, InvoiceItemForm
 from .models import Invoice, InvoiceItem
+from .models import EmployeePermission
+from core.templatetags.core_extras import user_has_permission
 
 def login_view(request):
     if request.method == 'POST':
@@ -298,11 +300,15 @@ def chat_user_list(request):
 
 @login_required
 def my_tickets(request):
+    if not user_has_permission(request.user, 'tickets', 'view'):
+        return HttpResponseForbidden('You do not have permission to view tickets.')
     tickets = Ticket.objects.filter(created_by=request.user).order_by('-created_at')
     return render(request, 'core/my_tickets.html', {'tickets': tickets})
 
 @login_required
 def submit_ticket(request):
+    if not user_has_permission(request.user, 'tickets', 'edit'):
+        return HttpResponseForbidden('You do not have permission to submit tickets.')
     if request.method == 'POST':
         title = request.POST.get('title')
         description = request.POST.get('description')
@@ -326,6 +332,8 @@ def update_ticket_status(request, ticket_id):
 
 @login_required
 def delete_ticket(request, ticket_id):
+    if not user_has_permission(request.user, 'tickets', 'delete'):
+        return HttpResponseForbidden('You do not have permission to delete tickets.')
     ticket = Ticket.objects.get(id=ticket_id)
     if request.user.is_superuser or ticket.created_by == request.user:
         ticket.delete()
@@ -1219,3 +1227,52 @@ def delete_invoice(request, invoice_id):
         invoice.delete()
         return redirect('invoices')
     return render(request, 'core/delete_invoice.html', {'invoice': invoice})
+
+@login_required
+def permissions(request):
+    is_admin = request.user.is_superuser
+    from .models import EmployeePermission, Employee
+    if is_admin:
+        employees = Employee.objects.select_related('user').all()
+    else:
+        employees = Employee.objects.select_related('user').filter(user=request.user)
+    modules = [
+        'dashboard', 'tickets', 'employees', 'attendance', 'departments',
+        'designations', 'holidays', 'leaves', 'my_tasks', 'chat'
+    ]
+    actions = ['view', 'edit', 'delete']
+    permissions = {}
+    for employee in employees:
+        permissions[employee.id] = {}
+        for module in modules:
+            permissions[employee.id][module] = {}
+            for action in actions:
+                perm, _ = EmployeePermission.objects.get_or_create(
+                    employee=employee, module=module, action=action,
+                    defaults={'allowed': False, 'locked': False}
+                )
+                permissions[employee.id][module][action] = perm
+    if request.method == 'POST' and is_admin:
+        for key, value in request.POST.items():
+            if key.startswith('perm_'):
+                _, emp_id, module, action = key.split('_')
+                perm = EmployeePermission.objects.get(
+                    employee_id=emp_id, module=module, action=action
+                )
+                perm.allowed = (value == 'on')
+                perm.save()
+            if key.startswith('lock_'):
+                _, emp_id, module, action = key.split('_')
+                perm = EmployeePermission.objects.get(
+                    employee_id=emp_id, module=module, action=action
+                )
+                perm.locked = (value == 'on')
+                perm.save()
+        return redirect('permissions')
+    return render(request, 'core/permissions.html', {
+        'employees': employees,
+        'modules': modules,
+        'actions': actions,
+        'permissions': permissions,
+        'is_admin': is_admin,
+    })
