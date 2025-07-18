@@ -29,4 +29,5 @@ RUN python manage.py collectstatic --noinput
 EXPOSE 8000
 
 # Run with Gunicorn (recommended for production)
-CMD ["gunicorn", "hrm_System.wsgi:application", "--bind", "0.0.0.0:8000"]
+CMD ["gunicorn", "hrm.wsgi:application", "--bind", "0.0.0.0:8000"]
+
