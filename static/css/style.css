@@ -1,0 +1,206 @@
+body, html {
+    min-height: 100vh;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+.login-bg {
+    min-height: 100vh;
+    width: 100vw;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.login-card-glass {
+    background: rgba(255, 255, 255, 0.18);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border-radius: 24px;
+    border: 1.5px solid rgba(255, 255, 255, 0.25);
+    padding: 48px 36px 36px 36px;
+    max-width: 400px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 2;
+}
+
+.login-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+.brand-logo {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    font-weight: bold;
+    font-size: 1.5rem;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(102,126,234,0.15);
+}
+.brand-name {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #333;
+    letter-spacing: 1px;
+}
+
+.login-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #222;
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+.login-desc {
+    color: #555;
+    font-size: 1.05rem;
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.login-form-modern {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+}
+.input-group-modern {
+    position: relative;
+    width: 100%;
+}
+.input-group-modern input {
+    width: 100%;
+    padding: 0.9rem 1rem 0.9rem 2.5rem;
+    border-radius: 10px;
+    border: 1.5px solid #e0e0e0;
+    font-size: 1rem;
+    background: rgba(255,255,255,0.7);
+    color: #222;
+    outline: none;
+    transition: border 0.2s, box-shadow 0.2s;
+    box-shadow: 0 1px 2px rgba(102,126,234,0.04);
+}
+.input-group-modern input:focus {
+    border-color: #764ba2;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(102,126,234,0.10);
+}
+.input-group-modern .input-icon {
+    position: absolute;
+    left: 0.8rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #764ba2;
+    font-size: 1.2rem;
+    opacity: 0.7;
+}
+
+.btn-modern {
+    border: none;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    padding: 0.9rem 0;
+    margin-bottom: 0.2rem;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 8px rgba(102,126,234,0.08);
+}
+.btn-gradient {
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+}
+.btn-gradient:hover {
+    background: linear-gradient(90deg, #764ba2 0%, #667eea 100%);
+    color: #fff;
+}
+.btn-google {
+    background: #fff;
+    color: #ea4335;
+    border: 1.5px solid #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.7rem;
+}
+.btn-google i {
+    font-size: 1.2rem;
+}
+.btn-google:hover {
+    background: #f5f5f5;
+    color: #b92c1a;
+}
+
+.or-divider {
+    text-align: center;
+    color: #aaa;
+    font-size: 0.95rem;
+    margin: 0.7rem 0 0.7rem 0;
+    position: relative;
+}
+.or-divider:before, .or-divider:after {
+    content: '';
+    display: inline-block;
+    width: 40%;
+    height: 1px;
+    background: #e0e0e0;
+    vertical-align: middle;
+    margin: 0 8px;
+}
+
+.login-footer {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1.2rem;
+}
+.forgot-link {
+    color: #764ba2;
+    font-size: 0.98rem;
+    text-decoration: none;
+    font-weight: 500;
+    margin-bottom: 0.2rem;
+}
+.forgot-link:hover {
+    text-decoration: underline;
+}
+.register-link {
+    color: #555;
+    font-size: 0.98rem;
+}
+.register-link a {
+    color: #764ba2;
+    font-weight: 600;
+    text-decoration: none;
+    margin-left: 0.2rem;
+}
+.register-link a:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+    .login-card-glass {
+        padding: 24px 8px 18px 8px;
+        max-width: 98vw;
+    }
+    .login-bg {
+        padding: 0 2vw;
+    }
+}

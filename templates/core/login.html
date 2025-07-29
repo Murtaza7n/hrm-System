@@ -1,45 +1,70 @@
 {% extends 'core/base.html' %}
 
-{% block title %}Login - HRM System{% endblock %}
+{% block title %}Login - SBS Technologies{% endblock %}
 
 {% block auth_content %}
-<div class="container-fluid">
-    <div class="row justify-content-center align-items-center min-vh-100" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-        <div class="col-md-6 col-lg-4">
-            <div class="card">
-                <div class="card-body p-5">
-                    <div class="text-center mb-4">
-                        <h2 class="text-primary">SBS Technologies</h2>
-                        <h4 class="text-muted">HRM System</h4>
-                    </div>
-                    
-                    {% if messages %}
-                        {% for message in messages %}
-                            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
-                                {{ message }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                            </div>
-                        {% endfor %}
-                    {% endif %}
-
-                    <form method="post">
-                        {% csrf_token %}
-                        <div class="mb-3">
-                            <label for="username" class="form-label">Email Address</label>
-                            <input type="text" class="form-control" id="username" name="username" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="password" name="password" required>
-                        </div>
-                        <div class="mb-3 text-end">
-                            <a href="#" class="text-decoration-none">Forgot password?</a>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">Login</button>
-                    </form>
-                </div>
+<div class="login-bg" style="position:relative;">
+    <canvas id="bg-canvas" style="position:absolute;top:0;left:0;width:100vw;height:100vh;z-index:0;"></canvas>
+    <div class="login-card-glass" style="position:relative;z-index:2;">
+        <div class="login-brand mb-4">
+            <span class="brand-logo">SBS</span>
+            <span class="brand-name">SBS Technologies</span>
+        </div>
+        <h2 class="login-title">Welcome Back</h2>
+        <p class="login-desc mb-4">Sign in to your account to continue</p>
+        <form method="post" class="login-form-modern">
+            {% csrf_token %}
+            <div class="input-group-modern">
+                <span class="input-icon"><i class="fa fa-user"></i></span>
+                <input type="text" id="username" name="username" placeholder="Username or Email" required>
             </div>
+            <div class="input-group-modern">
+                <span class="input-icon"><i class="fa fa-lock"></i></span>
+                <input type="password" id="password" name="password" placeholder="Password" required>
+            </div>
+            <button type="submit" class="btn-modern btn-gradient w-100">Sign In</button>
+        </form>
+        <div class="login-footer mt-4">
+            <a href="#" class="forgot-link">Forgot password?</a>
         </div>
     </div>
 </div>
+<script>
+// Animated gradient background effect
+const canvas = document.getElementById('bg-canvas');
+if (canvas) {
+    const ctx = canvas.getContext('2d');
+    let w = window.innerWidth;
+    let h = window.innerHeight;
+    canvas.width = w;
+    canvas.height = h;
+    let t = 0;
+    function draw() {
+        ctx.clearRect(0, 0, w, h);
+        for (let i = 0; i < 3; i++) {
+            const r = 200 + 55 * Math.sin(t + i);
+            const g = 120 + 80 * Math.cos(t + i * 1.5);
+            const b = 220 + 35 * Math.sin(t + i * 2);
+            const x = w/2 + Math.sin(t + i) * w/3;
+            const y = h/2 + Math.cos(t + i * 1.2) * h/3;
+            const grad = ctx.createRadialGradient(x, y, 0, x, y, w/2.2);
+            grad.addColorStop(0, `rgba(${r},${g},${b},0.25)`);
+            grad.addColorStop(1, 'rgba(255,255,255,0)');
+            ctx.beginPath();
+            ctx.arc(x, y, w/2.2, 0, 2 * Math.PI);
+            ctx.fillStyle = grad;
+            ctx.fill();
+        }
+        t += 0.008;
+        requestAnimationFrame(draw);
+    }
+    draw();
+    window.addEventListener('resize', () => {
+        w = window.innerWidth;
+        h = window.innerHeight;
+        canvas.width = w;
+        canvas.height = h;
+    });
+}
+</script>
 {% endblock %} 
