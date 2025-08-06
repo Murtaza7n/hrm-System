@@ -26,7 +26,7 @@ COPY . .
 RUN python manage.py collectstatic --noinput
 
 # Expose Django port
-EXPOSE 8000
+EXPOSE 443
 
 # Run Django with Gunicorn
 CMD ["gunicorn", "hrm.wsgi:application", "--bind", "0.0.0.0:443"]
